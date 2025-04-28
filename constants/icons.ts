@@ -17,6 +17,7 @@ import pause from "@/assets/icons/pause.png";
 import volume from "@/assets/icons/volume.png";
 import fullscreen from "@/assets/icons/fullscreen.png";
 import mute from "@/assets/icons/mute.png";
+import google from "@/assets/icons/googleLogo.png";
 
 
 export const icons = {
@@ -38,6 +39,7 @@ export const icons = {
   pause,
   volume,
   fullscreen, 
-  mute
+  mute,
+  google
 
 };

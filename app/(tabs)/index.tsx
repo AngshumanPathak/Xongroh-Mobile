@@ -2,6 +2,8 @@ import { ScrollView, Text, View, Pressable } from "react-native";
 import { useState } from "react";
 import PostCard from "@/components/home/PostCard";
 import VideoPlayer from "@/components/shared/VideoPlayer";
+import Login from "@/components/authentication/Login";
+import Signup from "@/components/authentication/SignUp";
 
 export default function Index() {
   const [selectedTab, setSelectedTab] = useState<'creations' | 'saved'>('creations');
@@ -29,12 +31,12 @@ export default function Index() {
           )}
         </Pressable>
       </View>
-      <View className="flex py-4 mt-6">
-        <PostCard/>
-      </View>
+      
       <View>
-        <VideoPlayer/>
+        <Signup/>
       </View>
+      
+      
     </ScrollView>
   );
 }
