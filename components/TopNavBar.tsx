@@ -18,10 +18,11 @@ const TopNavBar = () => {
       backgroundColor: '#101012'  
     }}>
       {/* Left: Logo + Title */}
-      <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+      <View className='flex-row items-center'>
         <Image
           source={images.logo}
           resizeMode="contain"
+          style={{ marginRight: -5}}
           
         />
         <Text style={{
@@ -29,7 +30,8 @@ const TopNavBar = () => {
           fontWeight: 'bold',
           color: '#D4AAFF',
           letterSpacing: 0.5,
-        }}>
+        }}
+        >
           ongroh
         </Text>
       </View>

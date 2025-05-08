@@ -1,14 +1,16 @@
-import { StyleSheet, Text, View } from 'react-native'
-import React from 'react'
+import { StyleSheet, Text, View } from "react-native";
+import React from "react";
+import Login from "../auth/Login";
 
 const explore = () => {
   return (
     <View>
-      <Text className='text-primary-500'>explore</Text>
+      <Text>Explore</Text>
+      
     </View>
-  )
-}
+  );
+};
 
-export default explore
+export default explore;
 
-const styles = StyleSheet.create({})
+const styles = StyleSheet.create({});
