@@ -22,7 +22,7 @@ import { useRouter } from "expo-router";
 
 const Login = () => {
   
-  const [isGoogleSignIn, setIsGoogleSignIn] = useState(false);
+  
   const { checkAuthUser, isLoading: isUserLoading } = useUserContext();
   const router = useRouter();
   
@@ -31,11 +31,6 @@ const Login = () => {
   const { mutateAsync: signInAccount, isPending: isSigningInUser } =
     useSignInAccount();
   const { mutateAsync: loginWithGoogle } = useLoginWithGoogle();
-
-
-
- 
-
 
   const {
     control,
@@ -49,6 +44,10 @@ const Login = () => {
       password: "",
     },
   });
+
+
+  const [isGoogleSignIn, setIsGoogleSignIn] = useState(false);
+  const formDisabled = isGoogleSignIn || isUserLoading || isSigningInUser;
 
   const handleGoogleSignin = async () => {
     setIsGoogleSignIn(true);
@@ -82,7 +81,7 @@ const Login = () => {
       if (isLoggedIn) {
         reset();
         Toast.show({ type: 'success', text1: 'Signin successful!' });
-        router.navigate('/auth/Signup'); // or navigation.navigate('Home') if using React Navigation
+        router.replace('/(tabs)'); // or navigation.navigate('Home') if using React Navigation
       } else {
         throw new Error('Authentication failed after sign-in');
       }
@@ -128,6 +127,7 @@ const Login = () => {
           <Controller
             control={control}
             name="email"
+            disabled={formDisabled}
             render={({ field: { onChange, onBlur, value } }) => (
               <View className="mb-4">
                 <TextInput
@@ -150,6 +150,7 @@ const Login = () => {
           <Controller
             control={control}
             name="password"
+            disabled={formDisabled}
             render={({ field: { onChange, onBlur, value } }) => (
               <View className="mb-4">
                 <TextInput
@@ -187,16 +188,18 @@ const Login = () => {
         </View>
 
         {/* Google Button */}
-        <Pressable className="flex-row items-center justify-center bg-neutral-800 p-4 rounded-lg border border-neutral-700 mb-6">
+        <TouchableOpacity className="flex-row items-center justify-center bg-neutral-800 p-4 rounded-lg border border-neutral-700 mb-6"
+          onPress={handleGoogleSignin}>
           <Image
             source={icons.google}
             className="w-5 h-5 mr-3"
             resizeMode="contain"
           />
+          
           <Text className="text-white text-base font-semibold">
             Continue with Google
           </Text>
-        </Pressable>
+        </TouchableOpacity>
 
         {/* Sign Up Link */}
         <Text className="text-neutral-400 text-center">

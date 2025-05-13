@@ -7,9 +7,11 @@ import { SignUpFormSchema } from '@/lib/schemas/schema';
 import { images} from '@/constants/images'; 
 import {icons} from '@/constants/icons';
 import { useState } from 'react';
-import { useCreateUserAccount } from '@/lib/tanstack/userQueries';
 import { useUserContext } from '@/context/AuthContext';
 import Toast from 'react-native-toast-message';
+import { useLoginWithGoogle, useCreateUserAccount } from '@/lib/tanstack/userQueries';
+import { loginWithGoogle } from '@/lib/appwrite/apis/users';
+import { router } from 'expo-router';
 
 type SignUpFormData = z.infer<typeof SignUpFormSchema>;
 
@@ -19,14 +21,19 @@ const Signup = () => {
   const [showTermsError, setShowTermsError] = useState(false);
   const [isEmailBlacklisted, setIsEmailBlacklisted] = useState(false);
   const [blacklistMessage, setBlacklistMessage] = useState('');
-  
-  
+  const [isGoogleSignUp, setIsGoogleSignUp] = useState(false);
 
+  
+  
 
   //Queries
   const { mutateAsync: createUserAccount, isPending: isCreatingAccount } =
     useCreateUserAccount();
+    const { mutateAsync: loginWithGoogle } = useLoginWithGoogle();
     const { checkAuthUser, isLoading: isUserLoading } = useUserContext();
+
+    const formDisabled = isGoogleSignUp || isCreatingAccount || isUserLoading;
+
 
   const {
     control,
@@ -125,7 +132,9 @@ const Signup = () => {
           text1: 'Account Created',
           text2: 'Please verify your email to complete the signup process.',
         });
+       
         reset();
+        router.replace('/auth/EnterOtp');
         
       } else {
         throw new Error('Authentication failed after sign-up');
@@ -145,6 +154,32 @@ const Signup = () => {
   const handleLinkPress = (url: string) => {
     Linking.openURL(url);
   };
+
+
+  const handleSignupWithGoogle = async () => {
+    if (!termsAccepted) {
+      setShowTermsError(true);
+      return;
+    }
+  
+    setIsGoogleSignUp(true);
+  
+    try {
+      await loginWithGoogle();
+    } catch (error) {
+      console.error('Google OAuth failed:', error);
+      Toast.show(
+        {
+          type: 'error',
+          text1: 'Google Sign-In Failed',
+          text2: 'Please try again later.',
+        }
+      ); // Use your Toast lib accordingly
+    } finally {
+      reset();
+    }
+  };
+
 
   return (
     <ScrollView>
@@ -166,6 +201,7 @@ const Signup = () => {
         <Controller
           control={control}
           name="name"
+          disabled={formDisabled}
           render={({ field }) => (
             <TextInput
               placeholder="Name"
@@ -181,6 +217,7 @@ const Signup = () => {
         {/* Hometown */}
         <Controller
           control={control}
+          disabled={formDisabled}
           name="hometown"
           render={({ field }) => (
             <TextInput
@@ -196,6 +233,7 @@ const Signup = () => {
 
         {/* Email */}
         <Controller
+          disabled={formDisabled}
           control={control}
           name="email"
           render={({ field }) => (
@@ -213,6 +251,7 @@ const Signup = () => {
 
         {/* Password */}
         <Controller
+          disabled={formDisabled}
           control={control}
           name="password"
           render={({ field }) => (
@@ -279,14 +318,15 @@ const Signup = () => {
             <View className="flex-1 h-px bg-neutral-700" />
           </View>
 
-          <Pressable className="flex-row items-center justify-center w-full bg-neutral-800 p-4 rounded-lg border border-neutral-700 mb-6">
+          <TouchableOpacity className="flex-row items-center justify-center w-full bg-neutral-800 p-4 rounded-lg border border-neutral-700 mb-6"
+          onPress={handleSignupWithGoogle}>
             <Image
               source={icons.google}
               className="w-5 h-5 mr-3 bg-transparent"
               resizeMode="contain"
             />
             <Text className="text-white text-base font-semibold">Continue with Google</Text>
-          </Pressable>
+          </TouchableOpacity>
 
           {/* Sign In Link */}
           <Text className="text-neutral-400">

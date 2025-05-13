@@ -2,11 +2,22 @@ import {ID, Models, Query, OAuthProvider} from 'appwrite';
 import { INewUser, IUpdateUser } from '@/types';
 import { account, functions, avatars, appwriteConfig, databases } from '../config';
 import { sign, decode } from "react-native-pure-jwt";
+import * as SecureStore from 'expo-secure-store';
 
 
 interface DecodedPayload {
-  email: string;
   otp: string;
+  email: string;
+  exp: number;
+}
+
+function isDecodedPayload(obj: any): obj is DecodedPayload {
+  return (
+    obj &&
+    typeof obj.otp === 'string' &&
+    typeof obj.email === 'string' &&
+    typeof obj.exp === 'number'
+  );
 }
 
 
@@ -192,6 +203,9 @@ export async function sendVerificationEmail() {
 
     await functions.createExecution('send-otp-email', JSON.stringify({ email: user.email, otp }));
 
+    // Store the token securely
+    await SecureStore.setItemAsync('otpToken', token);
+
     await account.updatePrefs({
       verificationAttempts: attempts + 1,
       lastVerificationTime: now,
@@ -205,36 +219,46 @@ export async function sendVerificationEmail() {
 }
 
 
-
 //Verify OTP
 
-export async function verifyOtp(enteredOtp: string, token: string): Promise<boolean> {
+export async function verifyOtp(enteredOtp: string): Promise<boolean> {
   try {
-    const jwtSecret = process.env.JWT_SECRET!; // Or a hardcoded string in dev
+    // Retrieve the token from SecureStore
+    const token = await SecureStore.getItemAsync('otpToken');
 
-    // Decode and verify the token
-    const decoded: any = await decode(
-      token,
-      jwtSecret,
-      {
-        skipValidation: false, // will check signature and exp
-        
-      }
-    );
+    if (!token) {
+      throw new Error('Token not found. Please request a new OTP.');
+    }
 
-    // Validate OTP
+    // Decode and verify the token (your previous logic here)
+    const raw = await decode(token, process.env.JWT_SECRET!, {
+      skipValidation: true,
+    }) as unknown;
+
+    if (!isDecodedPayload(raw)) {
+      throw new Error('Invalid token structure.');
+    }
+
+    const decoded = raw as DecodedPayload;
+
+    const now = Math.floor(Date.now() / 1000);
+    if (decoded.exp < now) {
+      throw new Error('OTP has expired. Please request a new one.');
+    }
+
     if (decoded.otp !== enteredOtp) {
       throw new Error('Invalid OTP. Please try again.');
     }
 
-    // Validate user identity
     const user = await account.get();
     if (user.email !== decoded.email) {
       throw new Error('Token does not belong to the authenticated user.');
     }
 
-    // Update verification status
     await account.updatePrefs({ isVerified: true });
+
+    // Optionally, remove the token after successful verification
+    await SecureStore.deleteItemAsync('otpToken');
 
     return true;
   } catch (error) {
@@ -242,9 +266,7 @@ export async function verifyOtp(enteredOtp: string, token: string): Promise<bool
     throw new Error('OTP verification failed. Please request a new one.');
   }
 }
- 
 
-    
 async function saveUserToDB(user: {
   accountId: string;
   name: string;

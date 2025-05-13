@@ -8,14 +8,25 @@ import {
 } from "react-native";
 
 import { images } from "@/constants/images";
-import { useRef, useState } from "react";
+import { useRef, useState, useEffect } from "react";
+import Toast from "react-native-toast-message";
+import { sendVerificationEmail, verifyOtp } from "@/lib/appwrite/apis/users"; // your custom resend and verify functions
+import { useRouter } from "expo-router";
+import {useUserContext} from "@/context/AuthContext"; 
+import LazyLoader from "@/components/shared/LazyLoader";
 
 const INITIAL_DELAY = 60; // 60 seconds for first 3 attempts
 const EXTENDED_DELAY = 120; // 120 seconds for last 2 attempts
+const MAX_ATTEMPTS = 5; // Maximum attempts allowed
 
 const EnterOtp = () => {
   const [otp, setOtp] = useState<string[]>(Array(6).fill(""));
+  const [attempts, setAttempts] = useState(0);
+  const [timer, setTimer] = useState(INITIAL_DELAY);
+  const [canResend, setCanResend] = useState(false);
   const inputs = useRef<Array<TextInput | null>>([]);
+  const router = useRouter();
+  const {user, isLoading, isVerified, isAuthenticated} = useUserContext(); 
 
   const focusInput = (index: number) => {
     if (index >= 0 && index < inputs.current.length) {
@@ -37,6 +48,88 @@ const EnterOtp = () => {
     if (e.nativeEvent.key === "Backspace" && !otp[index]) {
       focusInput(index - 1);
     }
+  };
+
+
+  useEffect(() => {
+    if (!canResend && timer > 0) {
+      const interval = setInterval(() => setTimer((prev) => prev - 1), 1000);
+      return () => clearInterval(interval);
+    }
+
+    if (timer === 0) {
+      setCanResend(true);
+    }
+  }, [timer, canResend]
+
+  
+
+);
+
+  const handleResendOtp = async () => {
+    if (attempts >= MAX_ATTEMPTS) {
+      Toast.show({ type: "error", text1: "Maximum resend attempts reached." });
+      return;
+    }
+  
+    try {
+      await sendVerificationEmail(); // Call your custom backend API
+      Toast.show({ type: "success", text1: "OTP resent to your email." });
+  
+      const newAttempts = attempts + 1;
+      setAttempts(newAttempts);
+  
+      const newDelay = newAttempts > 2 ? EXTENDED_DELAY : INITIAL_DELAY;
+      setTimer(newDelay);
+      setCanResend(false);
+    } catch (error) {
+      console.error("Resend OTP failed:", error);
+      Toast.show({ type: "error", text1: "Failed to resend OTP." });
+    }
+  };
+
+
+  const handleVerify = async () => {
+    const enteredOtp = otp.join("");
+  
+    if (enteredOtp.length < 6) {
+      Toast.show({ type: "error", text1: "Please enter a valid 6-digit OTP." });
+      return;
+    }
+  
+    try {
+      const success = await verifyOtp(enteredOtp); // Only send the OTP
+  
+      if (success) {
+        Toast.show({ type: "success", text1: "OTP verified successfully!" });
+        // Navigate to the next screen or main app
+         // Adjust the route as needed
+      }
+    } catch (error: any) {
+      Toast.show({
+        type: "error",
+        text1: error?.message || "OTP verification failed.",
+      });
+    }
+
+    if (isLoading) {
+    return (
+      <View className="flex-center w-full min-h-screen">
+        <LazyLoader src={""} alt={""}/>
+        <Text className="text-white">Loading...</Text>
+      </View>
+    );
+  }
+
+  // Redirect if not authenticated
+  if (!isAuthenticated) {
+    return router.replace("/auth/Login");
+  }
+
+  // Redirect if already verified
+  if (isVerified) {
+    return router.replace("/(tabs)");
+  }
   };
 
   return (
@@ -61,8 +154,11 @@ const EnterOtp = () => {
         ))}
       </View>
 
+
+
       <View className="mt-20">
       <TouchableOpacity
+        onPress={handleVerify}
         activeOpacity={0.7}
         className="w-full" // Decreases opacity when pressed
       >
@@ -70,6 +166,21 @@ const EnterOtp = () => {
           Verify OTP
         </Text>
       </TouchableOpacity>
+      </View>
+      <View className="mt-6 items-center">
+        <Text className="text-gray-500">
+          Didn’t get code?{" "}
+          {canResend ? (
+            <Text
+              onPress={handleResendOtp}
+              className="text-purple-600 font-semibold"
+            >
+              Resend
+            </Text>
+          ) : (
+            `Wait ${timer}s`
+          )}
+        </Text>
       </View>
       
     </View>
