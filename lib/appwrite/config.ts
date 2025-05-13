@@ -1,4 +1,4 @@
-import {ID, Account, Client, Functions, Avatars, Storage, Databases} from 'appwrite'
+import {ID, Account, Client, Functions, Avatars, Storage, Databases} from 'react-native-appwrite'
 
 
 interface DatabaseConfig {
@@ -10,6 +10,7 @@ interface DatabaseConfig {
     project: {
       id: string;
       url: string;
+      platform: string;
     };
   
     databases: {
@@ -69,7 +70,8 @@ interface DatabaseConfig {
 export const appwriteConfig: AppwriteConfig = {
    project: {
     url: process.env.APPWRITE_API_ENDPOINT!,
-    id: process.env.APPWRITE_PROJECT_ID!
+    id: process.env.APPWRITE_PROJECT_ID!,
+    platform: process.env.APPWRITE_PLATFORM!,
    },
 
    databases: {
@@ -240,7 +242,8 @@ const appwriteClient = new Client();
 
 appwriteClient
 .setEndpoint(appwriteConfig.project.url) // Your API Endpoint
-.setProject(appwriteConfig.project.id); // Your project ID
+.setProject(appwriteConfig.project.id)
+.setPlatform(appwriteConfig.project.platform); // Your project ID
 
 
 

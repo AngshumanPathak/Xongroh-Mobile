@@ -12,7 +12,7 @@ import { useRef, useState, useEffect } from "react";
 import Toast from "react-native-toast-message";
 import { sendVerificationEmail, verifyOtp } from "@/lib/appwrite/apis/users"; // your custom resend and verify functions
 import { useRouter } from "expo-router";
-import {useUserContext} from "@/context/AuthContext"; 
+import { useUserContext } from "@/context/AuthContext";
 import LazyLoader from "@/components/shared/LazyLoader";
 
 const INITIAL_DELAY = 60; // 60 seconds for first 3 attempts

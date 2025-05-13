@@ -1,4 +1,4 @@
-import {ID, Models, Query, OAuthProvider} from 'appwrite';
+import {ID, Models, Query, OAuthProvider} from 'react-native-appwrite';
 import { INewUser, IUpdateUser } from '@/types';
 import { account, functions, avatars, appwriteConfig, databases } from '../config';
 import { sign, decode } from "react-native-pure-jwt";
@@ -273,7 +273,7 @@ async function saveUserToDB(user: {
   username: string;
   hometown?: string;
   email: string;
-  dpUrl: string;
+  dpUrl: URL;
   agreeUserAgreements: Boolean;
   badges?: string[];
 }): Promise<Models.Document> {
