@@ -1,10 +1,10 @@
-import { Tabs, Redirect, useRouter } from "expo-router";
+import { Tabs, Redirect } from "expo-router";
 import { View, Image, Text } from "react-native";
 import React from "react";
 import { icons } from "@/constants/icons";
 import TopNavBar from "@/components/TopNavBar";
 import { LinearGradient } from "expo-linear-gradient";
-import { useUserContext } from "@/context/AuthContext";
+
 
 const TabIcon = ({ focused, icon, title }: any) => {
   if (focused) {
@@ -32,18 +32,7 @@ const TabIcon = ({ focused, icon, title }: any) => {
 };
 
 const TabLayout = () => {
-  const { isLoading, isAuthenticated } = useUserContext();
-  const router = useRouter();
-
-  // While checking auth status
-  if (isLoading) return null; // Or return a loading screen if you prefer
-
-  // Redirect unauthenticated users to /sign-in
-  if (!isAuthenticated) {
-    return router.replace("/auth/Login");
-  }
-
-  // Show Tabs only for authenticated users
+  
   return (
     <>
       <TopNavBar />
@@ -119,6 +108,7 @@ const TabLayout = () => {
             ),
           }}
         />
+        
       </Tabs>
     </>
   );

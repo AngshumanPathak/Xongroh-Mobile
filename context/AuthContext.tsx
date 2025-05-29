@@ -85,6 +85,8 @@ const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   const checkAuthUser = useCallback(async () => {
     try {
       const currentAccount = await getCurrentUser();
+      console.log("📦 currentAccount:", currentAccount);
+      
 
       if (!currentAccount) {
         dispatch({ type: 'SET_AUTH', payload: false });
@@ -156,6 +158,7 @@ const AuthProvider = ({ children }: { children: React.ReactNode }) => {
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
 };
+
 
 export default AuthProvider;
 

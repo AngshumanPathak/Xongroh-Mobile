@@ -19,7 +19,7 @@ import { z } from "zod";
 import { useSignInAccount, useLoginWithGoogle } from "@/lib/tanstack/userQueries";
 import Toast from 'react-native-toast-message';
 import { useRouter } from "expo-router";
-import { useUserContext } from "@/context/AuthContext";
+import { useUserContext } from "../../context/AuthContext";
 
 const Login = () => {
   
@@ -51,22 +51,30 @@ const Login = () => {
   const formDisabled = isGoogleSignIn || isUserLoading || isSigningInUser;
 
   const handleGoogleSignin = async () => {
-    setIsGoogleSignIn(true);
-  
-    try {
-      await loginWithGoogle(); 
-    } catch (error) {
-      console.error('Google OAuth failed:', error);
-      Toast.show({
-        type: 'error',
-        text1: 'Google Sign-In Failed',
-        text2: 'Please try again later.',
-        });
-    } finally {
+  setIsGoogleSignIn(true);
+
+  try {
+     await loginWithGoogle();
+    
+    const isLoggedIn = await checkAuthUser();
+    if (isLoggedIn) {
       reset();
-     
+      Toast.show({ type: "success", text1: "Google Sign-In successful!" });
+      router.replace("/(tabs)");
+    } else {
+      throw new Error("Authentication failed after Google sign-in");
     }
-  };
+  } catch (error) {
+    console.error("Google OAuth failed:", error);
+    Toast.show({
+      type: "error",
+      text1: "Google Sign-In Failed",
+      text2: "Please try again later.",
+    });
+  } finally {
+    setIsGoogleSignIn(false);
+  }
+};
 
   const handleSignin = async (user: z.infer<typeof LogInFormValidation>) => {
     try {

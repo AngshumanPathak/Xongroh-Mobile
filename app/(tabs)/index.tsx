@@ -1,8 +1,15 @@
 import { ScrollView, Text, View, Pressable } from "react-native";
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import { appwriteConfig } from "@/lib/appwrite/config";
+
+
+
+
 
 
 export default function Index() {
+
+  
   const [selectedTab, setSelectedTab] = useState<"creations" | "saved">(
     "creations"
   );
@@ -44,6 +51,10 @@ export default function Index() {
           )}
         </Pressable>
       </View>
+      <View>
+        
+      </View>
+      
       
     </ScrollView>
   );

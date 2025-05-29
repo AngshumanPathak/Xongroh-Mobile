@@ -12,7 +12,7 @@ import { useRef, useState, useEffect } from "react";
 import Toast from "react-native-toast-message";
 import { sendVerificationEmail, verifyOtp } from "@/lib/appwrite/apis/users"; // your custom resend and verify functions
 import { useRouter } from "expo-router";
-import { useUserContext } from "@/context/AuthContext";
+import { useUserContext } from "../../context/AuthContext";
 import LazyLoader from "@/components/shared/LazyLoader";
 
 const INITIAL_DELAY = 60; // 60 seconds for first 3 attempts
@@ -89,21 +89,20 @@ const EnterOtp = () => {
   };
 
 
-  const handleVerify = async () => {
+const handleVerify = async () => {
     const enteredOtp = otp.join("");
-  
+
     if (enteredOtp.length < 6) {
       Toast.show({ type: "error", text1: "Please enter a valid 6-digit OTP." });
       return;
     }
-  
+
     try {
-      const success = await verifyOtp(enteredOtp); // Only send the OTP
-  
+      const success = await verifyOtp(enteredOtp);
+
       if (success) {
         Toast.show({ type: "success", text1: "OTP verified successfully!" });
-        // Navigate to the next screen or main app
-         // Adjust the route as needed
+        router.replace("/(tabs)");
       }
     } catch (error: any) {
       Toast.show({
@@ -111,26 +110,28 @@ const EnterOtp = () => {
         text1: error?.message || "OTP verification failed.",
       });
     }
+  };
 
     if (isLoading) {
-    return (
-      <View className="flex-center w-full min-h-screen">
-        <LazyLoader src={""} alt={""}/>
-        <Text className="text-white">Loading...</Text>
-      </View>
-    );
-  }
+  return (
+    <View className="flex-center w-full min-h-screen">
+      <LazyLoader src={""} alt={""} />
+      <Text className="text-white">Loading...</Text>
+    </View>
+  );
+}
 
-  // Redirect if not authenticated
-  if (!isAuthenticated) {
-    return router.replace("/auth/Login");
-  }
+// Redirect if not authenticated
+if (!isAuthenticated) {
+  router.replace("/(auth)/Login");
+  return null;  // render nothing as redirect happens
+}
 
-  // Redirect if already verified
-  if (isVerified) {
-    return router.replace("/(tabs)");
-  }
-  };
+// Redirect if already verified
+if (isVerified) {
+  router.replace("/(tabs)");
+  return null;  // render nothing as redirect happens
+}
 
   return (
     <View>
@@ -189,4 +190,4 @@ const EnterOtp = () => {
 
 export default EnterOtp;
 
-const styles = StyleSheet.create({});
+

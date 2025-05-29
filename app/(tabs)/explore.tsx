@@ -1,16 +1,15 @@
-import { StyleSheet, Text, View } from "react-native";
-import React from "react";
-import Login from "../auth/Login";
+import { StyleSheet, Text, View } from 'react-native'
+import React from 'react'
+import AuthDebug from '@/components/home/AuthDebug'
 
 const explore = () => {
   return (
     <View>
-      <Text>Explore</Text>
-      
+      <Text></Text>
     </View>
-  );
-};
+  )
+}
 
-export default explore;
+export default explore
 
-const styles = StyleSheet.create({});
+const styles = StyleSheet.create({})

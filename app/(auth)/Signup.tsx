@@ -24,7 +24,7 @@ import {
 import { loginWithGoogle } from "@/lib/appwrite/apis/users";
 import { router } from "expo-router";
 import LazyLoader from "@/components/shared/LazyLoader";
-import { useUserContext } from "@/context/AuthContext";
+import { useUserContext } from "../../context/AuthContext";
 
 type SignUpFormData = z.infer<typeof SignUpFormSchema>;
 
@@ -140,7 +140,7 @@ const SignupScreen = () => {
         });
 
         reset();
-        router.replace("/auth/EnterOtp");
+        router.replace("/(auth)/EnterOtp");
       } else {
         throw new Error("Authentication failed after sign-up");
       }
@@ -358,7 +358,7 @@ const SignupScreen = () => {
             Already have an account?{" "}
             <Text
               className="text-purple-400"
-              onPress={() => router.replace("/auth/Login")}
+              onPress={() => router.replace("/(auth)/Login")}
             >
               Sign up
             </Text>
